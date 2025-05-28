@@ -77,7 +77,7 @@ eaccelerator_ver=0.9.6.1
 phalcon_ver=5.4.0
 yaf_ver=3.3.2
 yar_ver=2.2.0
-swoole_ver=5.0.3
+swoole_ver=5.1.6
 xdebug_ver=3.1.2
 
 # Ftp
