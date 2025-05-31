@@ -89,7 +89,7 @@ Install_PHP55() {
   if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-apxs2=${apache_install_dir}/bin/apxs ${phpcache_arg} --disable-fileinfo \
+    --with-apxs2=${apache_install_dir}/bin/apxs ${phpcache_arg} --enable-fileinfo \
     --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv-dir=/usr/local --with-freetype-dir=${freetype_install_dir} --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -100,7 +100,7 @@ Install_PHP55() {
   else
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm ${phpcache_arg} --disable-fileinfo \
+    --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm ${phpcache_arg} --enable-fileinfo \
     --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv-dir=/usr/local --with-freetype-dir=${freetype_install_dir} --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -150,7 +150,7 @@ opcache.enable=1
 opcache.memory_consumption=${Memory_limit}
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=4000
-opcache.revalidate_freq=60
+opcache.revalidate_freq=5
 ;opcache.save_comments=0
 opcache.fast_shutdown=1
 opcache.enable_cli=1
@@ -219,7 +219,8 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
-    if [ $Mem -le 3000 ]; then
+ Mem=4096
+   if [ $Mem -le 3000 ]; then
       sed -i "s@^pm.max_children.*@pm.max_children = $(($Mem/3/20))@" ${php_install_dir}/etc/php-fpm.conf
       sed -i "s@^pm.start_servers.*@pm.start_servers = $(($Mem/3/30))@" ${php_install_dir}/etc/php-fpm.conf
       sed -i "s@^pm.min_spare_servers.*@pm.min_spare_servers = $(($Mem/3/40))@" ${php_install_dir}/etc/php-fpm.conf
