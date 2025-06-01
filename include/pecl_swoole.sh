@@ -36,7 +36,11 @@ Install_pecl_swoole() {
     make -j ${THREAD} && make install
     popd > /dev/null
     if [ -f "${phpExtensionDir}/swoole.so" ]; then
-      echo 'extension=swoole.so' > ${php_install_dir}/etc/php.d/06-swoole.ini
+cat << EOF > ${php_install_dir}/etc/php.d/06-swoole.ini
+extension=swoole.so
+opcache.jit=tracing
+opcache.jit_buffer_size=64M
+EOF
       echo "${CSUCCESS}PHP swoole module installed successfully! ${CEND}"
       rm -rf swoole-${swoole_ver} swoole-4.8.12 swoole-1.10.5 swoole-4.5.2
     else

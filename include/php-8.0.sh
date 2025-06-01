@@ -172,8 +172,6 @@ opcache.revalidate_freq=5
 ;opcache.save_comments=0
 opcache.consistency_checks=0
 ;opcache.optimization_level=0
-opcache.jit=tracing
-opcache.jit_buffer_size=64M
 EOF
 
   if [ "${apache_mode_option}" != '2' ]; then
