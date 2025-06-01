@@ -5,9 +5,9 @@
 Install_Nginx() {
   pushd ${current_dir}/src > /dev/null
   id -g ${run_group} >/dev/null 2>&1
-  [ $? -ne 0 ] && groupadd ${run_group}
+  [ $? -ne 0 ] && groupadd -g 1001 ${run_group}
   id -u ${run_user} >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
+  [ $? -ne 0 ] && useradd -u 1001 -g ${run_group} -M -s /sbin/nologin ${run_user}
 
   tar xzf pcre-${pcre_ver}.tar.gz
   tar xzf nginx-${nginx_ver}.tar.gz
