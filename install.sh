@@ -408,9 +408,9 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG} 2${CEND}. Install MySQL-8.0"
           echo -e "\t${CMSG} 3${CEND}. Install MySQL-5.7"
           echo -e "\t${CMSG} 4${CEND}. Install MySQL-5.5"
-          echo -e "\t${CMSG} 5${CEND}. Install MariaDB-11.4"
-          echo -e "\t${CMSG} 6${CEND}. Install MariaDB-10.11"
-          echo -e "\t${CMSG} 7${CEND}. Install MariaDB-10.5"
+          echo -e "\t${CMSG} 5${CEND}. Install MariaDB-11.8"
+          echo -e "\t${CMSG} 6${CEND}. Install MariaDB-11.4"
+          echo -e "\t${CMSG} 7${CEND}. Install MariaDB-10.11"
           echo -e "\t${CMSG} 8${CEND}. Install MariaDB-5.5"
           echo -e "\t${CMSG} 9${CEND}. Install Percona-8.4"
           echo -e "\t${CMSG}10${CEND}. Install Percona-8.0"
@@ -812,16 +812,16 @@ case "${db_option}" in
     Install_MySQL55 2>&1 | tee -a ${current_dir}/install.log
     ;;
   5)
+    . include/mariadb-11.8.sh
+    Install_MariaDB118 2>&1 | tee -a ${current_dir}/install.log
+    ;;
+  6)
     . include/mariadb-11.4.sh
     Install_MariaDB114 2>&1 | tee -a ${current_dir}/install.log
     ;;
-  6)
+  7)
     . include/mariadb-10.11.sh
     Install_MariaDB1011 2>&1 | tee -a ${current_dir}/install.log
-    ;;
-  7)
-    . include/mariadb-10.5.sh
-    Install_MariaDB105 2>&1 | tee -a ${current_dir}/install.log
     ;;
   8)
     . include/mariadb-5.5.sh
