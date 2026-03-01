@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 
@@ -101,7 +101,7 @@ Install_PHP85() {
   if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-apxs2=${apache_install_dir}/bin/apxs --disable-fileinfo \
+    --with-apxs2=${apache_install_dir}/bin/apxs --enable-fileinfo \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv=/usr/local --with-freetype --with-jpeg --with-zlib \
     --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -112,7 +112,7 @@ Install_PHP85() {
   else
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm --disable-fileinfo \
+    --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm --enable-fileinfo \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv=/usr/local --with-freetype --with-jpeg --with-zlib \
     --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -147,13 +147,13 @@ Install_PHP85() {
   #sed -i 's@^;cgi.fix_pathinfo.*@cgi.fix_pathinfo=0@' ${php_install_dir}/etc/php.ini
   sed -i 's@^short_open_tag = Off@short_open_tag = On@' ${php_install_dir}/etc/php.ini
   sed -i 's@^expose_php = On@expose_php = Off@' ${php_install_dir}/etc/php.ini
-  sed -i 's@^request_order.*@request_order = "CGP"@' ${php_install_dir}/etc/php.ini
+  sed -i 's@^request_order.*@request_order = "GP"@' ${php_install_dir}/etc/php.ini
   sed -i "s@^;date.timezone.*@date.timezone = ${timezone}@" ${php_install_dir}/etc/php.ini
   sed -i 's@^post_max_size.*@post_max_size = 100M@' ${php_install_dir}/etc/php.ini
   sed -i 's@^upload_max_filesize.*@upload_max_filesize = 50M@' ${php_install_dir}/etc/php.ini
   sed -i 's@^max_execution_time.*@max_execution_time = 600@' ${php_install_dir}/etc/php.ini
   sed -i 's@^;realpath_cache_size.*@realpath_cache_size = 2M@' ${php_install_dir}/etc/php.ini
-  sed -i 's@^disable_functions.*@disable_functions = passthru,exec,system,chroot,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_restore,dl,readlink,symlink,popepassthru,stream_socket_server,fsocket,popen@' ${php_install_dir}/etc/php.ini
+  sed -i 's@^disable_functions.*@disable_functions = passthru,exec,system,chroot,chgrp,chown,shell_exec,ini_alter,ini_restore,dl,openlog,syslog,readlink,symlink,popepassthru,stream_socket_server@' ${php_install_dir}/etc/php.ini
   [ -e /usr/sbin/sendmail ] && sed -i 's@^;sendmail_path.*@sendmail_path = /usr/sbin/sendmail -t -i@' ${php_install_dir}/etc/php.ini
   if [ "${with_old_openssl_flag}" = 'y' ]; then
     sed -i "s@^;curl.cainfo.*@curl.cainfo = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
@@ -239,6 +239,7 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
+ Mem=4096
     if [ $Mem -le 3000 ]; then
       sed -i "s@^pm.max_children.*@pm.max_children = $(($Mem/3/20))@" ${php_install_dir}/etc/php-fpm.conf
       sed -i "s@^pm.start_servers.*@pm.start_servers = $(($Mem/3/30))@" ${php_install_dir}/etc/php-fpm.conf
