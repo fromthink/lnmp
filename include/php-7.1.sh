@@ -90,6 +90,8 @@ Install_PHP71() {
   make clean
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
+  intl_modules_options='--enable-intl'
+  [[ "${Platform}" =~ ^hce$ ]] && unset intl_modules_options
   if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
@@ -99,7 +101,7 @@ Install_PHP71() {
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization ${php71_with_curl} --enable-mbregex \
     --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf ${php71_with_openssl} \
-    --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+    --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl ${intl_modules_options} \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   else
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
@@ -110,7 +112,7 @@ Install_PHP71() {
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization ${php71_with_curl} --enable-mbregex \
     --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf ${php71_with_openssl} \
-    --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
+    --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl ${intl_modules_options} \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
   make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}

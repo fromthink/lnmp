@@ -27,7 +27,6 @@ pushd ${current_dir} > /dev/null
 dbrootpwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbpostgrespwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbmongopwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
-xcachepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbinstallmethod=1
 
 version() {
@@ -43,10 +42,10 @@ Show_Help() {
   --apache                    Install Apache
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
-  --php_option [1-14]         Install PHP version
-  --mphp_ver [53~84]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
+  --php_option [1-15]         Install PHP version
+  --mphp_ver [53~85]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --mphp_addons               Only install another PHP addons
-  --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
+  --phpcache_option [1-3]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
                               sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
                               yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
@@ -100,12 +99,12 @@ while :; do
       ;;
     --php_option)
       php_option=$2; shift 2
-      [[ ! ${php_option} =~ ^[1-9]$|^1[0-4]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~14${CEND}"; exit 1; }
+      [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~15${CEND}"; exit 1; }
       [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; }
       ;;
     --mphp_ver)
       mphp_ver=$2; mphp_flag=y; shift 2
-      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-3]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~83${CEND}"; exit 1; }
+      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-5]$|^8[0-5]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~85${CEND}"; exit 1; }
       ;;
     --mphp_addons)
       mphp_addons_flag=y; shift 1
@@ -502,10 +501,11 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}12${CEND}. Install php-8.2"
           echo -e "\t${CMSG}13${CEND}. Install php-8.3"
           echo -e "\t${CMSG}14${CEND}. Install php-8.4"
-          read -e -p "Please input a number:(Default 12 press Enter) " php_option
-          php_option=${php_option:-12}
-          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-4]$ ]]; then
-            echo "${CWARNING}input error! Please only input number 1~14${CEND}"
+          echo -e "\t${CMSG}15${CEND}. Install php-8.4"
+          read -e -p "Please input a number:(Default 14 press Enter) " php_option
+          php_option=${php_option:-14}
+          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]]; then
+            echo "${CWARNING}input error! Please only input number 1~15${CEND}"
           else
             break
           fi
@@ -534,12 +534,11 @@ if [ ${ARG_NUM} == 0 ]; then
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
               echo -e "\t${CMSG}2${CEND}. Install APCU"
-              echo -e "\t${CMSG}3${CEND}. Install XCache"
-              echo -e "\t${CMSG}4${CEND}. Install eAccelerator-0.9"
+              echo -e "\t${CMSG}3${CEND}. Install eAccelerator-0.9"
               read -e -p "Please input a number:(Default 1 press Enter) " phpcache_option
               phpcache_option=${phpcache_option:-1}
-              if [[ ! ${phpcache_option} =~ ^[1-4]$ ]]; then
-                echo "${CWARNING}input error! Please only input number 1~4${CEND}"
+              if [[ ! ${phpcache_option} =~ ^[1-3]$ ]]; then
+                echo "${CWARNING}input error! Please only input number 1~3${CEND}"
               else
                 break
               fi
@@ -550,12 +549,11 @@ if [ ${ARG_NUM} == 0 ]; then
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
               echo -e "\t${CMSG}2${CEND}. Install APCU"
-              echo -e "\t${CMSG}3${CEND}. Install XCache"
-              echo -e "\t${CMSG}4${CEND}. Install eAccelerator-1.0-dev"
+              echo -e "\t${CMSG}3${CEND}. Install eAccelerator-1.0-dev"
               read -e -p "Please input a number:(Default 1 press Enter) " phpcache_option
               phpcache_option=${phpcache_option:-1}
-              if [[ ! ${phpcache_option} =~ ^[1-4]$ ]]; then
-                echo "${CWARNING}input error! Please only input number 1~4${CEND}"
+              if [[ ! ${phpcache_option} =~ ^[1-3]$ ]]; then
+                echo "${CWARNING}input error! Please only input number 1~3${CEND}"
               else
                 break
               fi
@@ -566,11 +564,10 @@ if [ ${ARG_NUM} == 0 ]; then
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
               echo -e "\t${CMSG}2${CEND}. Install APCU"
-              echo -e "\t${CMSG}3${CEND}. Install XCache"
               read -e -p "Please input a number:(Default 1 press Enter) " phpcache_option
               phpcache_option=${phpcache_option:-1}
-              if [[ ! ${phpcache_option} =~ ^[1-3]$ ]]; then
-                echo "${CWARNING}input error! Please only input number 1~3${CEND}"
+              if [[ ! ${phpcache_option} =~ ^[1-2]$ ]]; then
+                echo "${CWARNING}input error! Please only input number 1~2${CEND}"
               else
                 break
               fi
@@ -581,11 +578,10 @@ if [ ${ARG_NUM} == 0 ]; then
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
               echo -e "\t${CMSG}2${CEND}. Install APCU"
-              echo -e "\t${CMSG}3${CEND}. Install XCache"
               read -e -p "Please input a number:(Default 1 press Enter) " phpcache_option
               phpcache_option=${phpcache_option:-1}
-              if [[ ! ${phpcache_option} =~ ^[1-3]$ ]]; then
-                echo "${CWARNING}input error! Please only input number 1~3${CEND}"
+              if [[ ! ${phpcache_option} =~ ^[1-2]$ ]]; then
+                echo "${CWARNING}input error! Please only input number 1~2${CEND}"
               else
                 break
               fi
@@ -609,13 +605,6 @@ if [ ${ARG_NUM} == 0 ]; then
         break
       fi
     done
-    # set xcache passwd
-    if [ "${phpcache_option}" == '3' ]; then
-      while :; do
-        read -e -p "Please input xcache admin password: " xcachepwd
-        (( ${#xcachepwd} >= 5 )) && { xcachepwd_md5=$(echo -n "${xcachepwd}" | md5sum | awk '{print $1}') ; break ; } || echo "${CFAILURE}xcache admin password least 5 characters! ${CEND}"
-      done
-    fi
     # PHP extension
     while :; do
       echo
@@ -695,7 +684,7 @@ if [ ${ARG_NUM} == 0 ]; then
   done
 
   # check phpMyAdmin
-  if [[ ${php_option} =~ ^[1-9]$|^1[0-4]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
+  if [[ ${php_option} =~ ^[1-9]$|^1[0-5]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
       read -e -p "Do you want to install phpMyAdmin? [y/n]: " phpmyadmin_flag
       if [[ ! ${phpmyadmin_flag} =~ ^[y,n]$ ]]; then
@@ -855,30 +844,6 @@ case "${db_option}" in
     ;;
 esac
 
-# Nginx server
-case "${nginx_option}" in
-  1)
-    . include/nginx.sh
-    Install_Nginx 2>&1 | tee -a ${current_dir}/install.log
-    ;;
-  2)
-    . include/tengine.sh
-    Install_Tengine 2>&1 | tee -a ${current_dir}/install.log
-    ;;
-  3)
-    . include/openresty.sh
-    Install_OpenResty 2>&1 | tee -a ${current_dir}/install.log
-    ;;
-esac
-
-# Apache
-if [ "${apache_flag}" == 'y' ]; then
-  apache_mode_option=${apache_mode_option:-1}
-  apache_mpm_option=${apache_mpm_option:-1}
-  . include/apache.sh
-  Install_Apache 2>&1 | tee -a ${current_dir}/install.log
-fi
-
 # PHP
 case "${php_option}" in
   1)
@@ -937,6 +902,10 @@ case "${php_option}" in
     . include/php-8.4.sh
     Install_PHP84 2>&1 | tee -a ${current_dir}/install.log
     ;;
+  15)
+    . include/php-8.5.sh
+    Install_PHP85 2>&1 | tee -a ${current_dir}/install.log
+    ;;
 esac
 
 PHP_addons() {
@@ -951,10 +920,6 @@ PHP_addons() {
       Install_APCU 2>&1 | tee -a ${current_dir}/install.log
       ;;
     3)
-      . include/xcache.sh
-      Install_XCache 2>&1 | tee -a ${current_dir}/install.log
-      ;;
-    4)
       . include/eaccelerator.sh
       Install_eAccelerator 2>&1 | tee -a ${current_dir}/install.log
       ;;
@@ -1102,6 +1067,31 @@ case "${jdk_option}" in
     ;;
 esac
 
+# Nginx server
+case "${nginx_option}" in
+  1)
+    . include/nginx.sh
+    Install_Nginx 2>&1 | tee -a ${current_dir}/install.log
+    ;;
+  2)
+    . include/tengine.sh
+    Install_Tengine 2>&1 | tee -a ${current_dir}/install.log
+    ;;
+  3)
+    . include/openresty.sh
+    Install_OpenResty 2>&1 | tee -a ${current_dir}/install.log
+    ;;
+esac
+
+# Apache
+if [ "${apache_flag}" == 'y' ]; then
+  apache_mode_option=${apache_mode_option:-1}
+  apache_mpm_option=${apache_mpm_option:-1}
+  . include/apache.sh
+  Install_Apache 2>&1 | tee -a ${current_dir}/install.log
+fi
+
+# Tomcat
 case "${tomcat_option}" in
   1)
     . include/tomcat-10.sh
@@ -1188,15 +1178,12 @@ echo "Total Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB password:")${CMSG}${dbmongopwd}${CEND}"
-[[ "${php_option}" =~ ^[1-9]$|^1[0-4]$ ]] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
+[[ "${php_option}" =~ ^[1-9]$|^1[0-5]$ ]] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
 [ "${phpcache_option}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
 [ "${phpcache_option}" == '2' ] && echo "$(printf "%-32s" "APC Control Panel URL:")${CMSG}http://${IPADDR}/apc.php${CEND}"
-[ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"
-[ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache user:")${CMSG}admin${CEND}"
-[ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache password:")${CMSG}${xcachepwd}${CEND}"
-[ "${phpcache_option}" == '4' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator Control Panel URL:")${CMSG}http://${IPADDR}/control.php${CEND}"
-[ "${phpcache_option}" == '4' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator user:")${CMSG}admin${CEND}"
-[ "${phpcache_option}" == '4' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator password:")${CMSG}eAccelerator${CEND}"
+[ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator Control Panel URL:")${CMSG}http://${IPADDR}/control.php${CEND}"
+[ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator user:")${CMSG}admin${CEND}"
+[ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator password:")${CMSG}eAccelerator${CEND}"
 [ "${pureftpd_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Pure-FTPd install dir:")${CMSG}${pureftpd_install_dir}${CEND}"
 [ "${pureftpd_flag}" == 'y' ] && echo "$(printf "%-32s" "Create FTP virtual script:")${CMSG}./pureftpd_vhost.sh${CEND}"
 [ "${phpmyadmin_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "phpMyAdmin dir:")${CMSG}${wwwroot_dir}/default/phpMyAdmin${CEND}"

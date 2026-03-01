@@ -156,12 +156,10 @@
                 <a v-if="hasXprober" href="xprober.php" target="_blank" rel="noopener noreferrer">PHP Prober</a>
                 <a v-if="hasOcp" href="ocp.php" target="_blank" rel="noopener noreferrer">Opcache</a>
                 <a v-if="hasApc" href="apc.php" target="_blank" rel="noopener noreferrer">APC</a>
-                <a v-if="hasXcache" href="xcache.php" target="_blank" rel="noopener noreferrer">xcache</a>
                 <a v-if="haseAccelerator" href="control.php" target="_blank" rel="noopener noreferrer">eAccelerator</a>
             </div>
             <div class="tools">
-                <iframe src="https://linuxeye.com/ad_buttom.html" width="475" frameborder="0" scrolling="no"
-                    title="Advertisement"></iframe>
+                <iframe src="https://linuxeye.com/ad_buttom.html" width="475" frameborder="0" scrolling="no" title="Advertisement"></iframe>
             </div>
         </div>
     </div>
@@ -178,7 +176,6 @@
                     hasXprober: false,
                     hasOcp: false,
                     hasApc: false,
-                    hasXcache: false,
                     haseAccelerator: false,
                     translations: {
                         en: {
@@ -276,13 +273,6 @@
                         this.hasApc = apcResponse.ok;
                     } catch (e) {
                         this.hasApc = false;
-                    }
-
-                    try {
-                        const xcacheResponse = await fetch('xcache/index.php', { method: 'HEAD' });
-                        this.hasXcache = xcacheResponse.ok;
-                    } catch (e) {
-                        this.hasXcache = false;
                     }
 
                     try {

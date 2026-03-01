@@ -89,7 +89,8 @@ Install_PHP53() {
   patch -p1 < ../php5.3-fileinfo.patch
   make clean
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
-  { [ ${RHEL_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 19 >/dev/null 2>&1 ]; } || intl_modules_options='--enable-intl'
+  { [ ${RHEL_ver:-0} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver:-0} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver:-0} -ge 19 >/dev/null 2>&1 ]; } || intl_modules_options='--enable-intl'
+  [[ "${Platform}" =~ ^hce$ ]] && unset intl_modules_options
   if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
@@ -113,7 +114,8 @@ Install_PHP53() {
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl ${intl_modules_options} \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
-  { [ ${RHEL_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 19 >/dev/null 2>&1 ]; } || sed -i '/^BUILD_/ s/\$(CC)/\$(CXX)/g' Makefile
+  { [ "${Platform}" == "hce" ] || [ ${RHEL_ver:-0} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver:-0} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver:-0} -ge 19 >/dev/null 2>&1 ]; } || sed -i '/^BUILD_/ s/\$(CC)/\$(CXX)/g' Makefile
+  [[ "${Platform}" =~ ^hce$ ]] && sed -i 's@-export-dynamic@-Wl,--export-dynamic@g' Makefile
   make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 

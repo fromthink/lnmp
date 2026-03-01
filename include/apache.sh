@@ -178,7 +178,7 @@ EOF
     sed -i "s@LogFormat \"%h %l@LogFormat \"%h %a %l@g" ${apache_install_dir}/conf/httpd.conf
   fi
   ldconfig
-  [ "${with_old_openssl_flag}" == 'y' ] && sed -i "s@^export LD_LIBRARY_PATH.*@export LD_LIBRARY_PATH=${openssl_install_dir}/lib:\$LD_LIBRARY_PATH@" ${apache_install_dir}/bin/envvars
+  sed -i "s@^export LD_LIBRARY_PATH.*@export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH@" ${apache_install_dir}/bin/envvars
   systemctl start httpd
   popd > /dev/null
 }

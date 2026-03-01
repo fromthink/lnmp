@@ -320,11 +320,9 @@ Uninstall_ALLPHP() {
 
 Uninstall_PHPcache() {
   . include/zendopcache.sh
-  . include/xcache.sh
   . include/apcu.sh
   . include/eaccelerator.sh
   Uninstall_ZendOPcache
-  Uninstall_XCache
   Uninstall_APCU
   Uninstall_eAccelerator
   # reload php
