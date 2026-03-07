@@ -207,7 +207,7 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
- Mem=4096
+ Mem=12288
    if [ $Mem -le 3000 ]; then
       sed -i "s@^pm.max_children.*@pm.max_children = $(($Mem/3/20))@" ${php_install_dir}/etc/php-fpm.conf
       sed -i "s@^pm.start_servers.*@pm.start_servers = $(($Mem/3/30))@" ${php_install_dir}/etc/php-fpm.conf

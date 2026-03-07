@@ -157,7 +157,7 @@ opcache.enable=1
 opcache.memory_consumption=${Memory_limit}
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=4000
-opcache.revalidate_freq=60
+opcache.revalidate_freq=6
 ;opcache.save_comments=0
 opcache.fast_shutdown=1
 opcache.enable_cli=1
@@ -226,7 +226,7 @@ env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 EOF
 
- Mem=4096
+ Mem=12288
    if [ $Mem -le 3000 ]; then
       sed -i "s@^pm.max_children.*@pm.max_children = $(($Mem/3/20))@" ${php_install_dir}/etc/php-fpm.conf
       sed -i "s@^pm.start_servers.*@pm.start_servers = $(($Mem/3/30))@" ${php_install_dir}/etc/php-fpm.conf
