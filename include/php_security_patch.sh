@@ -44,7 +44,8 @@ Apply_PHP_Security_Patch() {
 
   if patch --batch --forward --fuzz=0 --dry-run -p1 < "${patch_file}"; then
     patch --batch --forward --fuzz=0 -p1 < "${patch_file}" || patch_status=1
-  elif patch --batch --reverse --fuzz=0 --dry-run -p1 < "${patch_file}"; then
+  # Force reverse direction: --batch may ignore -R and accept mixed patch states.
+  elif patch --force --reverse --fuzz=0 --dry-run -p1 < "${patch_file}"; then
     echo "PHP security backport already applied."
   else
     echo "${CFAILURE}PHP security backport does not match this source; stopping.${CEND}"
