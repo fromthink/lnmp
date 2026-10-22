@@ -14,6 +14,19 @@ printf "
 # Check if user is root
 [ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
+# Unit files can be enabled offline, but service operations need running systemd.
+systemctl() {
+  case "$1" in
+    start|stop|restart|reload|try-restart|reload-or-restart|daemon-reload)
+      if [ ! -d /run/systemd/system ]; then
+        echo "Skipping systemctl $*: systemd is not running."
+        return 0
+      fi
+      ;;
+  esac
+  command systemctl "$@"
+}
+
 current_dir=$(dirname "`readlink -f $0`")
 pushd ${current_dir} > /dev/null
 . ./versions.txt
@@ -1208,4 +1221,8 @@ if [ ${ARG_NUM} == 0 ]; then
     fi
   done
 fi
-[ "${reboot_flag}" == 'y' ] && reboot
+if [ "${reboot_flag}" == 'y' ]; then
+  reboot
+else
+  exit 0
+fi
