@@ -145,6 +145,24 @@ systemctl {start|stop|status|restart|reload} memcached
 
 ## How to upgrade
 
+PHP 7.4.33, 8.0.30 and 8.1.34 installations and upgrades automatically apply
+the upstream source backports for CVE-2026-109618 and CVE-2026-109619 before
+compilation. A failed download or patch stops the operation. These backports
+do not restore general security support for these end-of-life branches.
+See the [official advisory](https://www.php.net/archive/2026.php#2026-10-21-5).
+
+Existing installations must be rebuilt, even if the version number is unchanged:
+
+```bash
+./upgrade.sh --php 7.4.33
+# or: ./upgrade.sh --php 8.0.30
+# or: ./upgrade.sh --php 8.1.34
+```
+
+These commands upgrade the default PHP installation configured in `options.conf`.
+Additional PHP installations must each be rebuilt separately using their own
+installation path. PHP 7.3 and older are not covered by these backports.
+
 ```bash
 ~/lnmp/upgrade.sh
 ```

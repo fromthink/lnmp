@@ -45,14 +45,17 @@ Install_MPHP() {
         74)
           . include/php-7.4.sh
           Install_PHP74 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         80)
           . include/php-8.0.sh
           Install_PHP80 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         81)
           . include/php-8.1.sh
           Install_PHP81 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         82)
           . include/php-8.2.sh

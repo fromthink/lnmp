@@ -86,6 +86,8 @@ Install_PHP80() {
 
   tar xzf php-${php80_ver}.tar.gz
   pushd php-${php80_ver} > /dev/null
+  . "${current_dir}/include/php_security_patch.sh"
+  Apply_PHP_Security_Patch "${php80_ver}" || exit 1
   if [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
     sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c
     sed -i '/OPENSSL_SSLV23_PADDING/a#endif' ext/openssl/openssl.c

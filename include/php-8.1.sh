@@ -86,6 +86,8 @@ Install_PHP81() {
 
   tar xzf php-${php81_ver}.tar.gz
   pushd php-${php81_ver} > /dev/null
+  . "${current_dir}/include/php_security_patch.sh"
+  Apply_PHP_Security_Patch "${php81_ver}" || exit 1
   make clean
   export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}

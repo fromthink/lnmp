@@ -10,6 +10,13 @@ Upgrade_PHP() {
   command -v python3 > /dev/null 2>&1 && pythonCtl=python3
   Latest_php_ver=`curl --connect-timeout 2 -m 3 -s https://www.php.net/releases/active.php | ${pythonCtl} -mjson.tool | awk '/version/{print $2}' | sed 's/"//g' | grep "${OLD_php_ver%.*}"`
   Latest_php_ver=${Latest_php_ver:-5.5.38}
+  # EOL branches are absent from active.php. Rebuild their final release with
+  # the upstream security backport, including when the version is unchanged.
+  case "${OLD_php_ver%.*}" in
+    7.4) Latest_php_ver=${php74_ver} ;;
+    8.0) Latest_php_ver=${php80_ver} ;;
+    8.1) Latest_php_ver=${php81_ver} ;;
+  esac
   echo
   echo "Current PHP Version: ${CMSG}$OLD_php_ver${CEND}"
   while :; do echo
@@ -36,6 +43,8 @@ Upgrade_PHP() {
       char=`get_char`
     fi
     tar xzf php-${NEW_php_ver}.tar.gz
+    . "${current_dir}/include/php_security_patch.sh"
+    (cd "php-${NEW_php_ver}" && Apply_PHP_Security_Patch "${NEW_php_ver}") || exit 1
     src_url=${mirror_link}/src/fpm-race-condition.patch && Download_src
     patch -d php-${NEW_php_ver} -p0 < fpm-race-condition.patch
     pushd php-${NEW_php_ver}

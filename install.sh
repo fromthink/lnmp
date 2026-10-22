@@ -881,14 +881,17 @@ case "${php_option}" in
   9)
     . include/php-7.4.sh
     Install_PHP74 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   10)
     . include/php-8.0.sh
     Install_PHP80 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   11)
     . include/php-8.1.sh
     Install_PHP81 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   12)
     . include/php-8.2.sh
@@ -1047,6 +1050,7 @@ PHP_addons() {
 if [ "${mphp_flag}" == 'y' ]; then
   . include/mphp.sh
   Install_MPHP 2>&1 | tee -a ${current_dir}/install.log
+  [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
   php_install_dir=${php_install_dir}${mphp_ver}
   PHP_addons
 fi
