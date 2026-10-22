@@ -4,7 +4,7 @@
 # https://www.php.net/archive/2026.php#2026-10-21-5
 # Run in the extracted PHP source directory, before configure/make.
 Apply_PHP_Security_Patch() {
-  local php_version="$1" patch_file patch_url
+  local php_version="$1" patch_file patch_url release_patch patch_status=0
   case "${php_version}" in
     7.4.33|8.0.30|8.1.34) ;;
     7.4.*|8.0.*|8.1.*)
@@ -31,12 +31,25 @@ Apply_PHP_Security_Patch() {
     mv "${patch_file}.tmp" "${patch_file}" || return 1
   fi
 
+  if [ "${php_version}" = '7.4.33' ] || [ "${php_version}" = '8.0.30' ] || [ "${php_version}" = '8.1.34' ]; then
+    # Git comparisons include release metadata and CI files that differ from
+    # release tarballs. Keep every security source hunk strict.
+    release_patch=$(mktemp) || return 1
+    if ! awk '/^diff --git / { skip = ($0 == "diff --git a/NEWS b/NEWS" || $0 == "diff --git a/configure.ac b/configure.ac" || $0 == "diff --git a/Zend/zend.h b/Zend/zend.h" || $0 == "diff --git a/main/php_version.h b/main/php_version.h" || $0 ~ /^diff --git a\/\.github\/workflows\//) } !skip { print }' "${patch_file}" > "${release_patch}"; then
+      rm -f "${release_patch}"
+      return 1
+    fi
+    patch_file="${release_patch}"
+  fi
+
   if patch --batch --forward --fuzz=0 --dry-run -p1 < "${patch_file}"; then
-    patch --batch --forward --fuzz=0 -p1 < "${patch_file}" || return 1
+    patch --batch --forward --fuzz=0 -p1 < "${patch_file}" || patch_status=1
   elif patch --batch --reverse --fuzz=0 --dry-run -p1 < "${patch_file}"; then
     echo "PHP security backport already applied."
   else
     echo "${CFAILURE}PHP security backport does not match this source; stopping.${CEND}"
-    return 1
+    patch_status=1
   fi
+  [ -n "${release_patch}" ] && rm -f "${release_patch}"
+  return "${patch_status}"
 }
