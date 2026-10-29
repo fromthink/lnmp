@@ -60,7 +60,7 @@ Show_Help() {
   --mphp_addons               Only install another PHP addons
   --phpcache_option [1-3]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
-                              sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
+                              sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,gmp,phalcon,
                               yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
   --nodejs                    Install Nodejs
   --tomcat_option [1-4]       Install Tomcat version
@@ -136,6 +136,7 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w imap`" ] && pecl_imap=1
       [ -n "`echo ${php_extensions} | grep -w ldap`" ] && pecl_ldap=1
       [ -n "`echo ${php_extensions} | grep -w calendar`" ] && pecl_calendar=1
+      [ -n "`echo ${php_extensions} | grep -w gmp`" ] && php_gmp=1
       [ -n "`echo ${php_extensions} | grep -w phalcon`" ] && pecl_phalcon=1
       [ -n "`echo ${php_extensions} | grep -w yaf`" ] && pecl_yaf=1
       [ -n "`echo ${php_extensions} | grep -w yar`" ] && pecl_yar=1
@@ -989,6 +990,13 @@ PHP_addons() {
   if [ "${pecl_ldap}" == '1' ]; then
     . include/pecl_ldap.sh
     Install_pecl_ldap 2>&1 | tee -a ${current_dir}/install.log
+  fi
+
+  # GMP (bundled PHP extension)
+  if [ "${php_gmp}" == '1' ]; then
+    . include/gmp.sh
+    Install_GMP 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
   fi
 
   # calendar
