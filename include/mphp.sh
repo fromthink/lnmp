@@ -7,40 +7,48 @@ Install_MPHP() {
     if [ -e "${php_install_dir}${mphp_ver}/bin/phpize" ]; then
       echo "${CWARNING}PHP${mphp_ver} already installed! ${CEND}"
     else
-      [ -e "/lib/systemd/system/php-fpm.service" ] && /bin/mv /lib/systemd/system/php-fpm.service{,_bk}
+      ! LNMP_Is_Container && [ -e "/lib/systemd/system/php-fpm.service" ] && /bin/mv /lib/systemd/system/php-fpm.service{,_bk}
       php_install_dir=${php_install_dir}${mphp_ver}
       case "${mphp_ver}" in
         53)
           . include/php-5.3.sh
           Install_PHP53 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         54)
           . include/php-5.4.sh
           Install_PHP54 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         55)
           . include/php-5.5.sh
           Install_PHP55 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         56)
           . include/php-5.6.sh
           Install_PHP56 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         70)
           . include/php-7.0.sh
           Install_PHP70 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         71)
           . include/php-7.1.sh
           Install_PHP71 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         72)
           . include/php-7.2.sh
           Install_PHP72 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         73)
           . include/php-7.3.sh
           Install_PHP73 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         74)
           . include/php-7.4.sh
@@ -60,21 +68,39 @@ Install_MPHP() {
         82)
           . include/php-8.2.sh
           Install_PHP82 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
         83)
           . include/php-8.3.sh
           Install_PHP83 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
+          ;;
+        84)
+          . include/php-8.4.sh
+          Install_PHP84 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
+          ;;
+        85)
+          . include/php-8.5.sh
+          Install_PHP85 2>&1 | tee -a ${current_dir}/install.log
+          [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
           ;;
       esac
       if [ -e "${php_install_dir}/sbin/php-fpm" ]; then
-        systemctl stop php-fpm
-        sed -i "s@/dev/shm/php-cgi.sock@/dev/shm/php${mphp_ver}-cgi.sock@" ${php_install_dir}/etc/php-fpm.conf
-        [ -e "/lib/systemd/system/php-fpm.service" ] && /bin/mv /lib/systemd/system/php-fpm.service /lib/systemd/system/php${mphp_ver}-fpm.service
-        [ -e "/lib/systemd/system/php-fpm.service_bk" ] && /bin/mv /lib/systemd/system/php-fpm.service{_bk,}
-        systemctl enable php${mphp_ver}-fpm
-        systemctl enable php-fpm
-        systemctl start php-fpm
-        systemctl start php${mphp_ver}-fpm
+        if LNMP_Is_Container; then
+          service php-fpm stop || exit 1
+          sed -i "s@/dev/shm/php-cgi.sock@/dev/shm/php${mphp_ver}-cgi.sock@" ${php_install_dir}/etc/php-fpm.conf
+          service php-fpm start || exit 1
+        else
+          systemctl stop php-fpm
+          sed -i "s@/dev/shm/php-cgi.sock@/dev/shm/php${mphp_ver}-cgi.sock@" ${php_install_dir}/etc/php-fpm.conf
+          [ -e "/lib/systemd/system/php-fpm.service" ] && /bin/mv /lib/systemd/system/php-fpm.service /lib/systemd/system/php${mphp_ver}-fpm.service
+          [ -e "/lib/systemd/system/php-fpm.service_bk" ] && /bin/mv /lib/systemd/system/php-fpm.service{_bk,}
+          systemctl enable php${mphp_ver}-fpm
+          systemctl enable php-fpm
+          systemctl start php-fpm
+          systemctl start php${mphp_ver}-fpm
+        fi
         sed -i "s@${php_install_dir}/bin:@@" /etc/profile
       fi
     fi

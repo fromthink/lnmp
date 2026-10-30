@@ -156,7 +156,7 @@ enable_lua_waf() {
   [ -z "`grep 'include waf.conf;' ${web_install_dir}/conf/nginx.conf`" ] && sed -i "s@ vhost/\*.conf;@&\n  include waf.conf;@" ${web_install_dir}/conf/nginx.conf
   ${web_install_dir}/sbin/nginx -t
   if [ $? -eq 0 ]; then
-    service nginx reload
+    service nginx reload || return 1
     echo "${CSUCCESS}ngx_lua_waf enabled successfully! ${CEND}"
     chown ${run_user}:${run_group} ${wwwlogs_dir}
   else
@@ -172,7 +172,7 @@ disable_lua_waf() {
   ${web_install_dir}/sbin/nginx -t
   if [ $? -eq 0 ]; then
     rm -rf ${web_install_dir}/conf/{waf,waf.conf}
-    service nginx reload
+    service nginx reload || return 1
     echo "${CSUCCESS}ngx_lua_waf disabled successfully! ${CEND}"
   else
     echo "${CFAILURE}ngx_lua_waf disable failed! ${CEND}"

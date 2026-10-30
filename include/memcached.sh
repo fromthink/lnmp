@@ -18,9 +18,11 @@ Install_memcached_server() {
     echo "${CSUCCESS}memcached installed successfully! ${CEND}"
     rm -rf memcached-${memcached_ver}
     ln -s ${memcached_install_dir}/bin/memcached /usr/bin/memcached
-    /bin/cp ../init.d/memcached.service /lib/systemd/system/
-    systemctl enable memcached
-    systemctl start memcached
+    if ! LNMP_Is_Container; then
+      /bin/cp ../init.d/memcached.service /lib/systemd/system/
+    fi
+    systemctl enable memcached || return 1
+    systemctl start memcached || return 1
     rm -rf memcached-${memcached_ver}
   else
     rm -rf ${memcached_install_dir}

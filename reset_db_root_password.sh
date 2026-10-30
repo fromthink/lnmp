@@ -14,6 +14,7 @@ printf "
 current_dir=$(dirname "`readlink -f $0`")
 pushd ${current_dir} > /dev/null
 . ./options.conf
+. ./include/service.sh || exit 1
 . ./include/color.sh
 . ./include/check_dir.sh
 [ ! -d "${db_install_dir}" ] && { echo "${CFAILURE}Database is not installed on your system! ${CEND}"; exit 1; }
@@ -107,7 +108,11 @@ update mysql.user set password = Password("${New_dbrootpwd}") where User = 'root
 EOF
   fi
   if [ $? -eq 0 ]; then
-    killall mysqld
+    if LNMP_Is_Container; then
+      service mysqld stop || return 1
+    else
+      killall mysqld
+    fi
     while [ -n "`ps -ef | grep mysqld | grep -v grep | awk '{print $2}'`" ]; do
       sleep 1
     done

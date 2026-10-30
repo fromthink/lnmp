@@ -98,7 +98,7 @@ Upgrade_DB() {
     fi
     if [ "${DB}" == 'MariaDB' ]; then
       tar xzf ${DB_filename}.tar.gz
-      service mysqld stop
+      service mysqld stop || return 1
       mv ${mariadb_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${mariadb_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "${mariadb_install_dir}" ] && mkdir -p ${mariadb_install_dir}
@@ -107,16 +107,16 @@ Upgrade_DB() {
       sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mariadb_install_dir}/bin/mysqld_safe
       ${mariadb_install_dir}/scripts/mysql_install_db --user=mysql --basedir=${mariadb_install_dir} --datadir=${mariadb_data_dir}
       chown mysql:mysql -R ${mariadb_data_dir}
-      service mysqld start
+      service mysqld start || return 1
       ${mariadb_install_dir}/bin/mysql < DB_all_backup_$(date +"%Y%m%d").sql
-      service mysqld restart
+      service mysqld restart || return 1
       ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "drop database test;" >/dev/null 2>&1
       ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset master;" >/dev/null 2>&1
       ${mariadb_install_dir}/bin/mysql_upgrade -uroot -p${dbrootpwd} >/dev/null 2>&1
       [ $? -eq 0 ] &&  echo "You have ${CMSG}successfully${CEND} upgrade from ${CMSG}${OLD_db_ver}${CEND} to ${CMSG}${NEW_db_ver}${CEND}"
     elif [ "${DB}" == 'Percona' ]; then
       tar xzf ${DB_filename}.tar.gz
-      service mysqld stop
+      service mysqld stop || return 1
       mv ${percona_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${percona_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "${percona_install_dir}" ] && mkdir -p ${percona_install_dir}
@@ -130,9 +130,9 @@ Upgrade_DB() {
         ${percona_install_dir}/bin/mysqld --initialize-insecure --user=mysql --basedir=${percona_install_dir} --datadir=${percona_data_dir}
       fi
       chown mysql:mysql -R ${percona_data_dir}
-      service mysqld start
+      service mysqld start || return 1
       ${percona_install_dir}/bin/mysql < DB_all_backup_$(date +"%Y%m%d").sql
-      service mysqld restart
+      service mysqld restart || return 1
       ${percona_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "drop database test;" >/dev/null 2>&1
       ${percona_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset master;" >/dev/null 2>&1
       ${percona_install_dir}/bin/mysql_upgrade -uroot -p${dbrootpwd} >/dev/null 2>&1
@@ -143,7 +143,7 @@ Upgrade_DB() {
       else
         tar xzf ${DB_filename}.tar.gz
       fi
-      service mysqld stop
+      service mysqld stop || return 1
       mv ${mysql_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${mysql_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "${mysql_install_dir}" ] && mkdir -p ${mysql_install_dir}
@@ -160,9 +160,9 @@ Upgrade_DB() {
       chown mysql:mysql -R ${mysql_data_dir}
       [ -e "${mysql_install_dir}/my.cnf" ] && rm -rf ${mysql_install_dir}/my.cnf
       sed -i '/myisam_repair_threads/d' /etc/my.cnf
-      service mysqld start
+      service mysqld start || return 1
       ${mysql_install_dir}/bin/mysql < DB_all_backup_$(date +"%Y%m%d").sql
-      service mysqld restart
+      service mysqld restart || return 1
       ${mysql_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "drop database test;" >/dev/null 2>&1
       ${mysql_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset master;" >/dev/null 2>&1
       ${mysql_install_dir}/bin/mysql_upgrade -uroot -p${dbrootpwd} >/dev/null 2>&1

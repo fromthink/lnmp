@@ -26,12 +26,14 @@ Install_redis_server() {
     [ $? -ne 0 ] && useradd -M -s /sbin/nologin redis
     chown -R redis:redis ${redis_install_dir}/{var,etc}
 
-    /bin/cp ../init.d/redis-server.service /lib/systemd/system/
-    sed -i "s@/usr/local/redis@${redis_install_dir}@g" /lib/systemd/system/redis-server.service
-    systemctl enable redis-server
+    if ! LNMP_Is_Container; then
+      /bin/cp ../init.d/redis-server.service /lib/systemd/system/
+      sed -i "s@/usr/local/redis@${redis_install_dir}@g" /lib/systemd/system/redis-server.service
+    fi
+    systemctl enable redis-server || return 1
     #[ -z "`grep 'vm.overcommit_memory' /etc/sysctl.conf`" ] && echo 'vm.overcommit_memory = 1' >> /etc/sysctl.conf
     #sysctl -p
-    systemctl start redis-server
+    systemctl start redis-server || return 1
   else
     rm -rf ${redis_install_dir}
     echo "${CFAILURE}Redis-server install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release

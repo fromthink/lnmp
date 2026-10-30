@@ -16,9 +16,11 @@ Install_PureFTPd() {
   make -j ${THREAD} && make install
   popd > /dev/null
   if [ -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ]; then
-    /bin/cp ../init.d/pureftpd.service /lib/systemd/system/
-    sed -i "s@/usr/local/pureftpd@${pureftpd_install_dir}@g" /lib/systemd/system/pureftpd.service
-    systemctl enable pureftpd
+    if ! LNMP_Is_Container; then
+      /bin/cp ../init.d/pureftpd.service /lib/systemd/system/
+      sed -i "s@/usr/local/pureftpd@${pureftpd_install_dir}@g" /lib/systemd/system/pureftpd.service
+    fi
+    systemctl enable pureftpd || return 1
 
     [ ! -e "${pureftpd_install_dir}/etc" ] && mkdir ${pureftpd_install_dir}/etc
     /bin/cp ../config/pure-ftpd.conf ${pureftpd_install_dir}/etc
@@ -33,7 +35,7 @@ Install_PureFTPd() {
     sed -i "s@^# TLS.*@&\nTLSCipherSuite             HIGH:MEDIUM:+TLSv1:\!SSLv2:\!SSLv3@" ${pureftpd_install_dir}/etc/pure-ftpd.conf
     sed -i "s@^# TLS.*@TLS                        1@" ${pureftpd_install_dir}/etc/pure-ftpd.conf
     ulimit -s unlimited
-    systemctl start pureftpd
+    systemctl start pureftpd || return 1
 
     # Firewall Ftp
     if [ "${PM}" == 'yum' ]; then

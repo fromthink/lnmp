@@ -17,6 +17,7 @@ printf "
 current_dir=$(dirname "`readlink -f $0`")
 pushd ${current_dir} > /dev/null
 . ./options.conf
+. ./include/service.sh || exit 1
 . ./include/color.sh
 . ./include/get_char.sh
 . ./include/check_dir.sh
@@ -183,6 +184,11 @@ Print_web() {
 }
 
 Uninstall_Web() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "nginx" || return 1
+    LNMP_Container_Service disable "httpd" || return 1
+    LNMP_Container_Service disable "tomcat" || return 1
+  fi
   [ -d "${nginx_install_dir}" ] && { killall nginx > /dev/null 2>&1; rm -rf ${nginx_install_dir} /etc/init.d/nginx /etc/logrotate.d/nginx; sed -i "s@${nginx_install_dir}/sbin:@@" /etc/profile; echo "${CMSG}Nginx uninstall completed! ${CEND}"; }
   [ -d "${tengine_install_dir}" ] && { killall nginx > /dev/null 2>&1; rm -rf ${tengine_install_dir} /etc/init.d/nginx /etc/logrotate.d/nginx; sed -i "s@${tengine_install_dir}/sbin:@@" /etc/profile; echo "${CMSG}Tengine uninstall completed! ${CEND}"; }
   [ -d "${openresty_install_dir}" ] && { killall nginx > /dev/null 2>&1; rm -rf ${openresty_install_dir} /etc/init.d/nginx /etc/logrotate.d/nginx; sed -i "s@${openresty_install_dir}/nginx/sbin:@@" /etc/profile; echo "${CMSG}OpenResty uninstall completed! ${CEND}"; }
@@ -217,6 +223,9 @@ Print_MongoDB() {
 }
 
 Uninstall_MySQL() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "mysqld" || return 1
+  fi
   # uninstall mysql,mariadb,percona
   if [ -d "${db_install_dir}/support-files" ]; then
     service mysqld stop > /dev/null 2>&1
@@ -230,6 +239,9 @@ Uninstall_MySQL() {
 }
 
 Uninstall_PostgreSQL() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "postgresql" || return 1
+  fi
   # uninstall postgresql
   if [ -e "${pgsql_install_dir}/bin/psql" ]; then
     service postgresql stop > /dev/null 2>&1
@@ -245,6 +257,9 @@ Uninstall_PostgreSQL() {
 }
 
 Uninstall_MongoDB() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "mongod" || return 1
+  fi
   # uninstall mongodb
   if [ -e "${mongo_install_dir}/bin/mongo" ]; then
     service mongod stop > /dev/null 2>&1
@@ -276,7 +291,7 @@ Print_ALLPHP() {
   [ -e "${php_install_dir}" ] && echo ${php_install_dir}
   [ -e "/etc/init.d/php-fpm" ] && echo /etc/init.d/php-fpm
   [ -e "/lib/systemd/system/php-fpm.service" ] && echo /lib/systemd/system/php-fpm.service
-  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84; do
+  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84 85; do
     [ -e "${php_install_dir}${php_ver}" ] && echo ${php_install_dir}${php_ver}
     [ -e "/etc/init.d/php${php_ver}-fpm" ] && echo /etc/init.d/php${php_ver}-fpm
     [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && echo /lib/systemd/system/php${php_ver}-fpm.service
@@ -288,6 +303,9 @@ Print_ALLPHP() {
 }
 
 Uninstall_PHP() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "php-fpm" || return 1
+  fi
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
   [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
@@ -296,18 +314,25 @@ Uninstall_PHP() {
 }
 
 Uninstall_MPHP() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "php${mphp_ver}-fpm" || return 1
+  fi
   [ -e "/etc/init.d/php${mphp_ver}-fpm" ] && { service php${mphp_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${mphp_ver}-fpm; }
   [ -e "/lib/systemd/system/php${mphp_ver}-fpm.service" ] && { systemctl stop php${mphp_ver}-fpm > /dev/null 2>&1; systemctl disable php${mphp_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${mphp_ver}-fpm.service; }
   [ -e "${php_install_dir}${mphp_ver}" ] && { rm -rf ${php_install_dir}${mphp_ver}; echo "${CMSG}PHP${mphp_ver} uninstall completed! ${CEND}"; }
 }
 
 Uninstall_ALLPHP() {
+  if LNMP_Is_Container; then
+    LNMP_Container_Service disable "php-fpm" || return 1
+  fi
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
   [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
   [ -e "${php_install_dir}" ] && { rm -rf ${php_install_dir}; echo "${CMSG}PHP uninstall completed! ${CEND}"; }
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
-  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84; do
+  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84 85; do
+    if LNMP_Is_Container; then LNMP_Container_Service disable "php${php_ver}-fpm" || return 1; fi
     [ -e "/etc/init.d/php${php_ver}-fpm" ] && { service php${php_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${php_ver}-fpm; }
     [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && { systemctl stop php${php_ver}-fpm > /dev/null 2>&1; systemctl disable php${php_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${php_ver}-fpm.service; }
     [ -e "${php_install_dir}${php_ver}" ] && { rm -rf ${php_install_dir}${php_ver}; echo "${CMSG}PHP${php_ver} uninstall completed! ${CEND}"; }
@@ -508,6 +533,7 @@ Print_PureFtpd() {
 }
 
 Uninstall_PureFtpd() {
+  if LNMP_Is_Container; then LNMP_Container_Service disable "pureftpd" || return 1; fi
   [ -e "${pureftpd_install_dir}" ] && { service pureftpd stop > /dev/null 2>&1; rm -rf ${pureftpd_install_dir} /etc/init.d/pureftpd; echo "${CMSG}Pureftpd uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/pureftpd.service" ] && { systemctl disable pureftpd > /dev/null 2>&1; rm -f /lib/systemd/system/pureftpd.service; }
 }
@@ -519,6 +545,7 @@ Print_Redis_server() {
 }
 
 Uninstall_Redis_server() {
+  if LNMP_Is_Container; then LNMP_Container_Service disable "redis-server" || return 1; fi
   [ -e "${redis_install_dir}" ] && { service redis-server stop > /dev/null 2>&1; rm -rf ${redis_install_dir} /etc/init.d/redis-server /usr/local/bin/redis-*; echo "${CMSG}Redis uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/redis-server.service" ] && { systemctl disable redis-server > /dev/null 2>&1; rm -f /lib/systemd/system/redis-server.service; }
 }
@@ -531,6 +558,7 @@ Print_Memcached_server() {
 }
 
 Uninstall_Memcached_server() {
+  if LNMP_Is_Container; then LNMP_Container_Service disable "memcached" || return 1; fi
   [ -e "${memcached_install_dir}" ] && { service memcached stop > /dev/null 2>&1; rm -rf ${memcached_install_dir} /etc/init.d/memcached /usr/bin/memcached; echo "${CMSG}Memcached uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/memcached.service" ] && { systemctl disable memcached > /dev/null 2>&1; rm -f /lib/systemd/system/memcached.service; }
 }

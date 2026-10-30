@@ -21,6 +21,7 @@ pushd ${current_dir} > /dev/null
 
 . ./versions.txt
 . ./options.conf
+. ./include/service.sh || exit 1
 . ./include/color.sh
 . ./include/check_os.sh
 . ./include/download.sh

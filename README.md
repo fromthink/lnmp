@@ -59,6 +59,40 @@ If you need to modify the directory (installation, data storage, Nginx logs), mo
 ./install.sh
 ```
 
+### Docker containers
+
+Install the `supervisor` package in the image before running the installer.
+Inside Docker, LNMP uses Supervisor for service registration and lifecycle
+operations. It does not deploy systemd units, register SysV boot services, or
+reboot the container. The installer may start Supervisor temporarily when a
+service is needed during installation (for example, database initialization).
+
+Use the foreground entrypoint at runtime:
+
+```dockerfile
+ENTRYPOINT ["/bin/bash", "/path/to/lnmp/container-entrypoint.sh"]
+```
+
+An existing `supervisord -n -c /etc/supervisor/supervisord.conf` entrypoint also
+works. Existing included program sections are reused; missing programs receive
+individual `lnmp-*.conf` files in `/etc/supervisor/conf.d`. Default and additional
+PHP-FPM installations use separate programs and sockets. Nginx upgrades restart
+the supervised process instead of forking a replacement master outside Supervisor.
+
+```bash
+bash service-control.sh status nginx
+bash service-control.sh reload nginx
+bash service-control.sh restart php74-fpm
+```
+
+Container detection is automatic; set `LNMP_CONTAINER=1` to force it or `0` for
+host service management. For a custom Supervisor layout, set
+`LNMP_SUPERVISOR_CONFIG` and `LNMP_SUPERVISOR_DIR` consistently during installation
+and runtime, and include the latter directory's `*.conf` files in the main config.
+Upgrades and management commands require Supervisor to be running; they return
+an error if it is unavailable. Supervisor's foreground mode is described in the
+[official documentation](https://supervisord.org/running.html).
+
 ## How to install another PHP version
 
 ```bash

@@ -116,6 +116,6 @@ EOF
     popd > /dev/null
     echo "${CFAILURE}Tomcat install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
   fi
-  service tomcat start
+  service tomcat start || return 1
   popd > /dev/null
 }

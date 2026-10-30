@@ -38,9 +38,12 @@ Install_Nginx() {
   [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${nginx_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${nginx_install_dir}/sbin:\1@" /etc/profile
   . /etc/profile
 
-  /bin/cp ../init.d/nginx.service /lib/systemd/system/
-  sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /lib/systemd/system/nginx.service
-  systemctl enable nginx
+  if ! LNMP_Is_Container; then
+    /bin/cp ../init.d/nginx.service /lib/systemd/system/
+    sed -i "s@/usr/local/nginx@${nginx_install_dir}@g" /lib/systemd/system/nginx.service
+  fi
+  web_install_dir=${nginx_install_dir}
+  systemctl enable nginx || return 1
 
   mv ${nginx_install_dir}/conf/nginx.conf{,_bk}
   if [ "${apache_flag}" == 'y' ] || [ -e "${apache_install_dir}/bin/httpd" ]; then
@@ -89,5 +92,5 @@ ${wwwlogs_dir}/*nginx.log {
 EOF
   popd > /dev/null
   ldconfig
-  systemctl start nginx
+  systemctl start nginx || return 1
 }

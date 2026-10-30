@@ -18,6 +18,7 @@ current_dir=$(dirname "`readlink -f $0`")
 pushd ${current_dir} > /dev/null
 . ./versions.txt
 . ./options.conf
+. ./include/service.sh || exit 1
 . ./include/color.sh
 . ./include/check_os.sh
 . ./include/check_dir.sh
@@ -131,33 +132,33 @@ What Are You Doing?
     else
       case "${Upgrade_flag}" in
         1)
-          [ -e "${nginx_install_dir}/sbin/nginx" ] && Upgrade_Nginx
-          [ -e "${tengine_install_dir}/sbin/nginx" ] && Upgrade_Tengine
-          [ -e "${openresty_install_dir}/nginx/sbin/nginx" ] && Upgrade_OpenResty
+          [ -e "${nginx_install_dir}/sbin/nginx" ] && { Upgrade_Nginx || exit 1; }
+          [ -e "${tengine_install_dir}/sbin/nginx" ] && { Upgrade_Tengine || exit 1; }
+          [ -e "${openresty_install_dir}/nginx/sbin/nginx" ] && { Upgrade_OpenResty || exit 1; }
           ;;
         2)
-          Upgrade_Apache
+          Upgrade_Apache || exit 1
           ;;
         3)
-          Upgrade_Tomcat
+          Upgrade_Tomcat || exit 1
           ;;
         4)
-          Upgrade_DB
+          Upgrade_DB || exit 1
           ;;
         5)
-          Upgrade_PHP
+          Upgrade_PHP || exit 1
           ;;
         6)
-          Upgrade_Redis
+          Upgrade_Redis || exit 1
           ;;
         7)
-          Upgrade_Memcached
+          Upgrade_Memcached || exit 1
           ;;
         8)
-          Upgrade_phpMyAdmin
+          Upgrade_phpMyAdmin || exit 1
           ;;
         9)
-          Upgrade_Script
+          Upgrade_Script || exit 1
           ;;
         10)
           [ -e ~/.acme.sh/acme.sh ] && { ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version; }
@@ -173,16 +174,16 @@ What Are You Doing?
 if [ ${ARG_NUM} == 0 ]; then
   Menu
 else
-  [ "${nginx_flag}" == 'y' ] && Upgrade_Nginx
-  [ "${tengine_flag}" == 'y' ] && Upgrade_Tengine
-  [ "${openresty_flag}" == 'y' ] && Upgrade_OpenResty
-  [ "${apache_flag}" == 'y' ] && Upgrade_Apache
-  [ "${tomcat_flag}" == 'y' ] && Upgrade_Tomcat
-  [ "${db_flag}" == 'y' ] && Upgrade_DB
-  [ "${php_flag}" == 'y' ] && Upgrade_PHP
-  [ "${redis_flag}" == 'y' ] && Upgrade_Redis
-  [ "${memcached_flag}" == 'y' ] && Upgrade_Memcached
-  [ "${phpmyadmin_flag}" == 'y' ] && Upgrade_phpMyAdmin
-  [ "${NEW_Script_ver}" == 'latest' ] && Upgrade_Script
+  [ "${nginx_flag}" == 'y' ] && { Upgrade_Nginx || exit 1; }
+  [ "${tengine_flag}" == 'y' ] && { Upgrade_Tengine || exit 1; }
+  [ "${openresty_flag}" == 'y' ] && { Upgrade_OpenResty || exit 1; }
+  [ "${apache_flag}" == 'y' ] && { Upgrade_Apache || exit 1; }
+  [ "${tomcat_flag}" == 'y' ] && { Upgrade_Tomcat || exit 1; }
+  [ "${db_flag}" == 'y' ] && { Upgrade_DB || exit 1; }
+  [ "${php_flag}" == 'y' ] && { Upgrade_PHP || exit 1; }
+  [ "${redis_flag}" == 'y' ] && { Upgrade_Redis || exit 1; }
+  [ "${memcached_flag}" == 'y' ] && { Upgrade_Memcached || exit 1; }
+  [ "${phpmyadmin_flag}" == 'y' ] && { Upgrade_phpMyAdmin || exit 1; }
+  [ "${NEW_Script_ver}" == 'latest' ] && { Upgrade_Script || exit 1; }
   [ "${NEW_acme_ver}" == 'latest' ] && [ -e ~/.acme.sh/acme.sh ] && { ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version; }
 fi

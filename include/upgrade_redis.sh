@@ -39,9 +39,9 @@ Upgrade_Redis() {
 
     if [ -f "src/redis-server" ]; then
       echo "Restarting Redis..."
-      service redis-server stop
+      service redis-server stop || return 1
       /bin/cp src/{redis-benchmark,redis-check-aof,redis-check-rdb,redis-cli,redis-sentinel,redis-server} $redis_install_dir/bin/
-      service redis-server start
+      service redis-server start || return 1
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_redis_ver${CEND} to ${CWARNING}$NEW_redis_ver${CEND}"
       rm -rf redis-$NEW_redis_ver

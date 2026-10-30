@@ -58,16 +58,16 @@ Upgrade_PHP() {
     make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
     if [ -e "${apache_install_dir}/bin/httpd" ]; then
       echo "Stoping apache..."
-      service httpd stop
+      service httpd stop || return 1
       make install
       echo "Starting apache..."
-      service httpd start
+      service httpd start || return 1
     else
       echo "Stoping php-fpm..."
-      service php-fpm stop
+      service php-fpm stop || return 1
       make install
       echo "Starting php-fpm..."
-      service php-fpm start
+      service php-fpm start || return 1
     fi
     popd > /dev/null
     echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_php_ver${CEND} to ${CWARNING}${NEW_php_ver}${CEND}"

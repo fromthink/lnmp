@@ -152,9 +152,11 @@ Install_PHP53() {
 
   if [ "${apache_mode_option}" != '2' ]; then
     # php-fpm Init Script
-    /bin/cp ${current_dir}/init.d/php-fpm.service /lib/systemd/system/
-    sed -i "s@/usr/local/php@${php_install_dir}@g" /lib/systemd/system/php-fpm.service
-    systemctl enable php-fpm
+    if ! LNMP_Is_Container; then
+      /bin/cp ${current_dir}/init.d/php-fpm.service /lib/systemd/system/
+      sed -i "s@/usr/local/php@${php_install_dir}@g" /lib/systemd/system/php-fpm.service
+    fi
+    systemctl enable php-fpm || return 1
 
     cat > ${php_install_dir}/etc/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -240,10 +242,10 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    systemctl start php-fpm
+    systemctl start php-fpm || return 1
 
   elif [ "${apache_mode_option}" == '2' ]; then
-    systemctl restart httpd
+    systemctl restart httpd || return 1
   fi
   popd > /dev/null
   [ -e "${php_install_dir}/bin/phpize" ] && rm -rf php-${php53_ver}

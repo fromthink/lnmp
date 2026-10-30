@@ -33,9 +33,12 @@ Install_Tengine() {
   [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${tengine_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${tengine_install_dir}/sbin:\1@" /etc/profile
   . /etc/profile
 
-  /bin/cp ../init.d/nginx.service /lib/systemd/system/
-  sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /lib/systemd/system/nginx.service
-  systemctl enable nginx
+  if ! LNMP_Is_Container; then
+    /bin/cp ../init.d/nginx.service /lib/systemd/system/
+    sed -i "s@/usr/local/nginx@${tengine_install_dir}@g" /lib/systemd/system/nginx.service
+  fi
+  web_install_dir=${tengine_install_dir}
+  systemctl enable nginx || return 1
 
   mv ${tengine_install_dir}/conf/nginx.conf{,_bk}
   if [ "${apache_flag}" == 'y' ] || [ -e "${apache_install_dir}/bin/httpd" ]; then
@@ -85,5 +88,5 @@ ${wwwlogs_dir}/*nginx.log {
 EOF
   popd > /dev/null
   ldconfig
-  systemctl start nginx
+  systemctl start nginx || return 1
 }

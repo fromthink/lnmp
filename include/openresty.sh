@@ -34,9 +34,12 @@ Install_OpenResty() {
   [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${openresty_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${openresty_install_dir}/nginx/sbin:\1@" /etc/profile
   . /etc/profile
 
-  /bin/cp ../init.d/nginx.service /lib/systemd/system/
-  sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /lib/systemd/system/nginx.service
-  systemctl enable nginx
+  if ! LNMP_Is_Container; then
+    /bin/cp ../init.d/nginx.service /lib/systemd/system/
+    sed -i "s@/usr/local/nginx@${openresty_install_dir}/nginx@g" /lib/systemd/system/nginx.service
+  fi
+  web_install_dir=${openresty_install_dir}/nginx
+  systemctl enable nginx || return 1
 
   mv ${openresty_install_dir}/nginx/conf/nginx.conf{,_bk}
   if [ "${apache_flag}" == 'y' ] || [ -e "${apache_install_dir}/bin/httpd" ]; then
@@ -85,5 +88,5 @@ ${wwwlogs_dir}/*nginx.log {
 EOF
   popd > /dev/null
   ldconfig
-  systemctl start nginx
+  systemctl start nginx || return 1
 }

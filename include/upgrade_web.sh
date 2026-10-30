@@ -81,9 +81,13 @@ Upgrade_Nginx() {
     if [ -f "objs/nginx" ]; then
       /bin/mv ${nginx_install_dir}/sbin/nginx{,`date +%m%d`}
       /bin/cp objs/nginx ${nginx_install_dir}/sbin/nginx
-      kill -USR2 `cat /var/run/nginx.pid`
-      sleep 1
-      kill -QUIT `cat /var/run/nginx.pid.oldbin`
+      if LNMP_Is_Container; then
+        service nginx restart || exit 1
+      else
+        kill -USR2 `cat /var/run/nginx.pid`
+        sleep 1
+        kill -QUIT `cat /var/run/nginx.pid.oldbin`
+      fi
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_nginx_ver}${CEND} to ${CWARNING}${NEW_nginx_ver}${CEND}"
       rm -rf nginx-${NEW_nginx_ver}
@@ -146,9 +150,13 @@ Upgrade_Tengine() {
       /bin/cp objs/nginx ${tengine_install_dir}/sbin/nginx
       chmod +x ${tengine_install_dir}/sbin/*
       make install
-      kill -USR2 `cat /var/run/nginx.pid`
-      sleep 1
-      kill -QUIT `cat /var/run/nginx.pid.oldbin`
+      if LNMP_Is_Container; then
+        service nginx restart || exit 1
+      else
+        kill -USR2 `cat /var/run/nginx.pid`
+        sleep 1
+        kill -QUIT `cat /var/run/nginx.pid.oldbin`
+      fi
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_tengine_ver${CEND} to ${CWARNING}${NEW_tengine_ver}${CEND}"
       rm -rf tengine-${NEW_tengine_ver}
@@ -204,9 +212,13 @@ Upgrade_OpenResty() {
     if [ -f "build/nginx-${NEW_openresy_ver%.*}/objs/nginx" ]; then
       /bin/mv ${openresty_install_dir}/nginx/sbin/nginx{,`date +%m%d`}
       make install
-      kill -USR2 `cat /var/run/nginx.pid`
-      sleep 1
-      kill -QUIT `cat /var/run/nginx.pid.oldbin`
+      if LNMP_Is_Container; then
+        service nginx restart || exit 1
+      else
+        kill -USR2 `cat /var/run/nginx.pid`
+        sleep 1
+        kill -QUIT `cat /var/run/nginx.pid.oldbin`
+      fi
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_openresy_ver}${CEND} to ${CWARNING}${NEW_openresy_ver}${CEND}"
       rm -rf openresty-${NEW_openresy_ver}
@@ -280,10 +292,10 @@ Upgrade_Apache() {
     make -j ${THREAD}
     if [ -e 'httpd' ]; then
       [[ -d ${apache_install_dir}_bak && -d ${apache_install_dir} ]] && rm -rf ${apache_install_dir}_bak
-      service httpd stop
+      service httpd stop || return 1
       /bin/cp -R ${apache_install_dir}{,_bak}
       make install && unset LDFLAGS
-      service httpd start
+      service httpd start || return 1
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_apache_ver}${CEND} to ${CWARNING}${NEW_apache_ver}${CEND}"
       rm -rf httpd-${NEW_apache_ver}
@@ -340,11 +352,11 @@ Upgrade_Tomcat() {
     /bin/cp -R ${tomcat_install_dir}/conf/vhost apache-tomcat-${NEW_tomcat_ver}/conf/
     chmod +x apache-tomcat-${NEW_tomcat_ver}/bin/*.sh
     [[ -d ${tomcat_install_dir}_bak && -d ${tomcat_install_dir} ]] && rm -rf ${tomcat_install_dir}._bak
-    service tomcat stop
+    service tomcat stop || return 1
     /bin/mv ${tomcat_install_dir}{,_bak}
     /bin/mv apache-tomcat-${NEW_tomcat_ver} ${tomcat_install_dir} && chown -R ${run_user}:${run_group} ${tomcat_install_dir}
     if [ -e "${tomcat_install_dir}/conf/server.xml" ]; then
-      service tomcat start
+      service tomcat start || return 1
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_tomcat_ver}${CEND} to ${CWARNING}${NEW_tomcat_ver}${CEND}"
     else
       echo "${CFAILURE}Upgrade Tomcat failed! ${CEND}"

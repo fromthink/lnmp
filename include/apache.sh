@@ -65,9 +65,11 @@ Install_Apache() {
   [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${apache_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${apache_install_dir}/bin:\1@" /etc/profile
   . /etc/profile
 
-  /bin/cp ../init.d/httpd.service /lib/systemd/system/
-  sed -i "s@/usr/local/apache@${apache_install_dir}@g" /lib/systemd/system/httpd.service
-  systemctl enable httpd
+  if ! LNMP_Is_Container; then
+    /bin/cp ../init.d/httpd.service /lib/systemd/system/
+    sed -i "s@/usr/local/apache@${apache_install_dir}@g" /lib/systemd/system/httpd.service
+  fi
+  systemctl enable httpd || return 1
 
   sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
   sed -i "s@^Group daemon@Group ${run_group}@" ${apache_install_dir}/conf/httpd.conf
@@ -179,6 +181,6 @@ EOF
   fi
   ldconfig
   sed -i "s@^export LD_LIBRARY_PATH.*@export LD_LIBRARY_PATH=/usr/local/lib:\$LD_LIBRARY_PATH@" ${apache_install_dir}/bin/envvars
-  systemctl start httpd
+  systemctl start httpd || return 1
   popd > /dev/null
 }

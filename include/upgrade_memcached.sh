@@ -41,9 +41,9 @@ Upgrade_Memcached() {
 
     if [ -e "memcached" ]; then
       echo "Restarting Memcached..."
-      service memcached stop
+      service memcached stop || return 1
       make install
-      service memcached start
+      service memcached start || return 1
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_memcached_ver}${CEND} to ${CWARNING}${NEW_memcached_ver}${CEND}"
       rm -rf memcached-${NEW_memcached_ver}

@@ -9,9 +9,11 @@ Install_MongoDB() {
   mkdir -p ${mongo_data_dir};chown mongod.mongod -R ${mongo_data_dir}
   tar xzf mongodb-linux-x86_64-${mongodb_ver}.tgz
   /bin/mv mongodb-linux-x86_64-${mongodb_ver} ${mongo_install_dir}
-  /bin/cp ${current_dir}/init.d/mongod.service /lib/systemd/system/
-  sed -i "s@=/usr/local/mongodb@=${mongo_install_dir}@g" /lib/systemd/system/mongod.service
-  systemctl enable mongod
+  if ! LNMP_Is_Container; then
+    /bin/cp ${current_dir}/init.d/mongod.service /lib/systemd/system/
+    sed -i "s@=/usr/local/mongodb@=${mongo_install_dir}@g" /lib/systemd/system/mongod.service
+  fi
+  systemctl enable mongod || return 1
 
   cat > /etc/mongod.conf << EOF
 # mongod.conf
@@ -53,7 +55,7 @@ net:
 #replication:
 #sharding:
 EOF
-  systemctl start mongod
+  systemctl start mongod || return 1
   echo ${mongo_install_dir}/bin/mongo 127.0.0.1/admin --eval \"db.createUser\(\{user:\'root\',pwd:\'$dbmongopwd\',roles:[\'userAdminAnyDatabase\']\}\)\" | bash
   sed -i 's@^#security:@security:@' /etc/mongod.conf
   sed -i 's@^#  authorization:@  authorization:@' /etc/mongod.conf

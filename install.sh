@@ -14,23 +14,11 @@ printf "
 # Check if user is root
 [ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
-# Unit files can be enabled offline, but service operations need running systemd.
-systemctl() {
-  case "$1" in
-    start|stop|restart|reload|try-restart|reload-or-restart|daemon-reload)
-      if [ ! -d /run/systemd/system ]; then
-        echo "Skipping systemctl $*: systemd is not running."
-        return 0
-      fi
-      ;;
-  esac
-  command systemctl "$@"
-}
-
 current_dir=$(dirname "`readlink -f $0`")
 pushd ${current_dir} > /dev/null
 . ./versions.txt
 . ./options.conf
+. ./include/service.sh || exit 1
 . ./include/color.sh
 . ./include/check_os.sh
 . ./include/check_dir.sh
@@ -218,6 +206,11 @@ while :; do
       ;;
   esac
 done
+
+if LNMP_Is_Container; then
+  LNMP_Supervisor_Setup || exit 1
+  LNMP_SUPERVISOR_BOOTSTRAP=1
+fi
 
 # Check md5sum
 if [ ${ARG_NUM} == 0 ] && [ ! -e ~/.lnmp ]; then
@@ -801,60 +794,74 @@ case "${db_option}" in
   1)
     . include/mysql-8.4.sh
     Install_MySQL84 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   2)
     . include/mysql-8.0.sh
     Install_MySQL80 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   3)
     . include/mysql-5.7.sh
     Install_MySQL57 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   4)
     . include/mysql-5.5.sh
     Install_MySQL55 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   5)
     . include/mariadb-11.8.sh
     Install_MariaDB118 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   6)
     . include/mariadb-11.4.sh
     Install_MariaDB114 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   7)
     . include/mariadb-10.11.sh
     Install_MariaDB1011 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   8)
     . include/mariadb-5.5.sh
     Install_MariaDB55 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   9)
     [ "${Family}" == 'rhel' ] && [ "${RHEL_ver}" == '8' ] && dbinstallmethod=2 && checkDownload
     . include/percona-8.4.sh
     Install_Percona84 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   10)
     [ "${Family}" == 'rhel' ] && [ "${RHEL_ver}" == '8' ] && dbinstallmethod=2 && checkDownload
     . include/percona-8.0.sh
     Install_Percona80 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   11)
     . include/percona-5.7.sh
     Install_Percona57 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   12)
     . include/percona-5.5.sh
     Install_Percona55 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   13)
     . include/postgresql.sh
     Install_PostgreSQL 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   14)
     . include/mongodb.sh
     Install_MongoDB 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
 esac
 
@@ -863,34 +870,42 @@ case "${php_option}" in
   1)
     . include/php-5.3.sh
     Install_PHP53 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   2)
     . include/php-5.4.sh
     Install_PHP54 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   3)
     . include/php-5.5.sh
     Install_PHP55 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   4)
     . include/php-5.6.sh
     Install_PHP56 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   5)
     . include/php-7.0.sh
     Install_PHP70 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   6)
     . include/php-7.1.sh
     Install_PHP71 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   7)
     . include/php-7.2.sh
     Install_PHP72 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   8)
     . include/php-7.3.sh
     Install_PHP73 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   9)
     . include/php-7.4.sh
@@ -910,18 +925,22 @@ case "${php_option}" in
   12)
     . include/php-8.2.sh
     Install_PHP82 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   13)
     . include/php-8.3.sh
     Install_PHP83 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   14)
     . include/php-8.4.sh
     Install_PHP84 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   15)
     . include/php-8.5.sh
     Install_PHP85 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
 esac
 
@@ -1097,14 +1116,17 @@ case "${nginx_option}" in
   1)
     . include/nginx.sh
     Install_Nginx 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   2)
     . include/tengine.sh
     Install_Tengine 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   3)
     . include/openresty.sh
     Install_OpenResty 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
 esac
 
@@ -1114,6 +1136,7 @@ if [ "${apache_flag}" == 'y' ]; then
   apache_mpm_option=${apache_mpm_option:-1}
   . include/apache.sh
   Install_Apache 2>&1 | tee -a ${current_dir}/install.log
+  [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
 fi
 
 # Tomcat
@@ -1121,18 +1144,22 @@ case "${tomcat_option}" in
   1)
     . include/tomcat-10.sh
     Install_Tomcat10 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   2)
     . include/tomcat-9.sh
     Install_Tomcat9 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   3)
     . include/tomcat-8.sh
     Install_Tomcat8 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
   4)
     . include/tomcat-7.sh
     Install_Tomcat7 2>&1 | tee -a ${current_dir}/install.log
+    [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
     ;;
 esac
 
@@ -1146,6 +1173,7 @@ fi
 if [ "${pureftpd_flag}" == 'y' ]; then
   . include/pureftpd.sh
   Install_PureFTPd 2>&1 | tee -a ${current_dir}/install.log
+  [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
 fi
 
 # phpMyAdmin
@@ -1158,12 +1186,14 @@ fi
 if [ "${redis_flag}" == 'y' ]; then
   . include/redis.sh
   Install_redis_server 2>&1 | tee -a ${current_dir}/install.log
+  [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
 fi
 
 # memcached
 if [ "${memcached_flag}" == 'y' ]; then
   . include/memcached.sh
   Install_memcached_server 2>&1 | tee -a ${current_dir}/install.log
+  [ ${PIPESTATUS[0]} -eq 0 ] || exit 1
 fi
 
 # index example
@@ -1218,7 +1248,7 @@ echo "Total Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 if [[ ${nginx_option} =~ ^[1-3]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-4]$ ]]; then
   echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
 fi
-if [ ${ARG_NUM} == 0 ]; then
+if [ ${ARG_NUM} == 0 ] && ! LNMP_Is_Container; then
   while :; do echo
     echo "${CMSG}Please restart the server and see if the services start up fine.${CEND}"
     read -e -p "Do you want to restart OS ? [y/n]: " reboot_flag

@@ -12,8 +12,10 @@ Install_fail2ban() {
   else
     python setup.py install
   fi
-  /bin/cp build/fail2ban.service /lib/systemd/system/
-  systemctl enable fail2ban
+  if ! LNMP_Is_Container; then
+    /bin/cp build/fail2ban.service /lib/systemd/system/
+  fi
+  systemctl enable fail2ban || return 1
   [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}' | head -1`
   if [ "${PM}" == 'yum' ]; then
   cat > /etc/fail2ban/jail.local << EOF
@@ -72,7 +74,7 @@ EOF
 }
 EOF
   kill -9 `ps -ef | grep fail2ban | grep -v grep | awk '{print $2}'` > /dev/null 2>&1
-  systemctl start fail2ban
+  systemctl start fail2ban || return 1
   popd > /dev/null
   if [ -e "/usr/local/bin/fail2ban-server" ]; then
     echo; echo "${CSUCCESS}fail2ban installed successfully! ${CEND}"
@@ -83,7 +85,7 @@ EOF
 }
 
 Uninstall_fail2ban() {
-  systemctl stop fail2ban
+  systemctl stop fail2ban || return 1
   systemctl disable fail2ban
   rm -rf /usr/local/bin/fail2ban* /etc/init.d/fail2ban /etc/fail2ban /etc/logrotate.d/fail2ban /var/log/fail2ban.* /var/run/fail2ban /lib/systemd/system/fail2ban.service
   echo; echo "${CMSG}fail2ban uninstall completed${CEND}";

@@ -14,13 +14,15 @@ Install_PostgreSQL() {
   make install
   chmod 755 ${pgsql_install_dir}
   chown -R postgres.postgres ${pgsql_install_dir}
-  /bin/cp ${current_dir}/init.d/postgresql.service /lib/systemd/system/
-  sed -i "s@=/usr/local/pgsql@=${pgsql_install_dir}@g" /lib/systemd/system/postgresql.service
-  sed -i "s@PGDATA=.*@PGDATA=${pgsql_data_dir}@" /lib/systemd/system/postgresql.service
-  systemctl enable postgresql
+  if ! LNMP_Is_Container; then
+    /bin/cp ${current_dir}/init.d/postgresql.service /lib/systemd/system/
+    sed -i "s@=/usr/local/pgsql@=${pgsql_install_dir}@g" /lib/systemd/system/postgresql.service
+    sed -i "s@PGDATA=.*@PGDATA=${pgsql_data_dir}@" /lib/systemd/system/postgresql.service
+  fi
+  systemctl enable postgresql || return 1
   popd
   su - postgres -c "${pgsql_install_dir}/bin/initdb -D ${pgsql_data_dir}"
-  systemctl start postgresql
+  systemctl start postgresql || return 1
   sleep 5
   su - postgres -c "${pgsql_install_dir}/bin/psql -c \"alter user postgres with password '$dbpostgrespwd';\""
   sed -i 's@^host.*@#&@g' ${pgsql_data_dir}/pg_hba.conf
@@ -28,7 +30,7 @@ Install_PostgreSQL() {
   echo 'local   all             all                                     md5' >> ${pgsql_data_dir}/pg_hba.conf
   echo 'host    all             all             0.0.0.0/0               md5' >> ${pgsql_data_dir}/pg_hba.conf
   sed -i "s@^#listen_addresses.*@listen_addresses = '*'@" ${pgsql_data_dir}/postgresql.conf
-  systemctl reload postgresql
+  systemctl reload postgresql || return 1
 
   if [ -e "${pgsql_install_dir}/bin/psql" ]; then
     sed -i "s+^dbpostgrespwd.*+dbpostgrespwd='$dbpostgrespwd'+" ../options.conf

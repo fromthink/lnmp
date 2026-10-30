@@ -17,6 +17,7 @@ printf "
 current_dir=$(dirname "`readlink -f $0`")
 pushd ${current_dir} > /dev/null
 . ./options.conf
+. ./include/service.sh || exit 1
 . ./include/color.sh
 . ./include/check_dir.sh
 . ./include/check_os.sh
@@ -266,7 +267,7 @@ EOF
       ~/.acme.sh/acme.sh --force --issue -k ${CERT_KEYLENGTH} -w ${vhostdir} -d ${domain} ${moredomainame_D}
     fi
       [ -e "${PATH_SSL}/${domain}.crt" ] && rm -f ${PATH_SSL}/${domain}.{crt,key}
-      Nginx_cmd="/usr/bin/supervisorctl restart nginx"
+      Nginx_cmd="/bin/bash ${current_dir}/service-control.sh reload nginx"
       Apache_cmd="${apache_install_dir}/bin/apachectl -k graceful"
       if [ -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
         Command="${Nginx_cmd};${Apache_cmd}"
