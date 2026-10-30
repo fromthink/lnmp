@@ -85,8 +85,10 @@ bash service-control.sh reload nginx
 bash service-control.sh restart php74-fpm
 ```
 
-Container detection is automatic; set `LNMP_CONTAINER=1` to force it or `0` for
-host service management. For a custom Supervisor layout, set
+Container detection is automatic, including BuildKit RUN steps without Docker
+marker files. If systemd is not running, automatic mode selects Supervisor.
+Set `LNMP_CONTAINER=1` to force Supervisor or `0` for host service management.
+For a custom Supervisor layout, set
 `LNMP_SUPERVISOR_CONFIG` and `LNMP_SUPERVISOR_DIR` consistently during installation
 and runtime, and include the latter directory's `*.conf` files in the main config.
 Upgrades and management commands require Supervisor to be running; they return

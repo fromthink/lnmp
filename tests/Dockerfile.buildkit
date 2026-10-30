@@ -1,0 +1,11 @@
+# Use a disposable image with Supervisor, Nginx, PHP and PHP74 installed.
+# docker build --build-arg LNMP_TEST_IMAGE=your-lnmp-image -f tests/Dockerfile.buildkit .
+ARG LNMP_TEST_IMAGE
+FROM ${LNMP_TEST_IMAGE}
+COPY include/service.sh include/check_dir.sh /work/include/
+COPY service-control.sh container-entrypoint.sh /work/
+COPY tests/container-services.sh /work/tests/
+# Optionally exercise an installed PostgreSQL distribution as well.
+ARG LNMP_TEST_PGSQL_DIR=
+ENV LNMP_TEST_PGSQL_DIR=${LNMP_TEST_PGSQL_DIR}
+RUN /bin/bash /work/tests/container-services.sh

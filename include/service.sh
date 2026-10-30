@@ -4,7 +4,14 @@ LNMP_Is_Container() {
   case "${LNMP_CONTAINER:-auto}" in
     1) return 0 ;;
     0) return 1 ;;
-    auto) [ -e /.dockerenv ] || [ -e /run/.containerenv ] || grep -qaE '(docker|containerd|kubepods|lxc)' /proc/1/cgroup ;;
+    auto)
+      # BuildKit RUN steps may have no container marker and cgroup "0::/".
+      # Without a running systemd instance, use Supervisor rather than falling
+      # through to host systemctl. LNMP_CONTAINER=0 still forces host handling.
+      [ -e /.dockerenv ] || [ -e /run/.containerenv ] ||
+        grep -qaE '(docker|containerd|kubepods|lxc)' /proc/1/cgroup ||
+        [ ! -d /run/systemd/system ]
+      ;;
     *) echo 'LNMP_CONTAINER must be auto, 0 or 1.' >&2; return 2 ;;
   esac
 }

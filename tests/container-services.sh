@@ -4,7 +4,7 @@ set -euo pipefail
 repo=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 work=$(mktemp -d /tmp/lnmp-services.XXXXXX)
 trap 'supervisorctl -c "${work}/supervisord.conf" shutdown >/dev/null 2>&1 || :; rm -rf "${work}"' EXIT
-export LNMP_CONTAINER=1
+export LNMP_CONTAINER=auto
 export LNMP_SUPERVISOR_CONFIG=${work}/supervisord.conf
 export LNMP_SUPERVISOR_DIR=${work}/conf.d
 mkdir -p "${LNMP_SUPERVISOR_DIR}" "${work}/nginx/sbin" "${work}/nginx/conf" "${work}/php/sbin" "${work}/php/etc" "${work}/php74/sbin" "${work}/php74/etc"
@@ -34,6 +34,7 @@ pm.max_children = 1
 CONF
 done
 . "${repo}/include/service.sh"
+LNMP_Is_Container || { echo "Container/build environment misdetected as host" >&2; exit 1; }
 LNMP_Supervisor_Setup
 grep -q "files=${LNMP_SUPERVISOR_DIR}/\*.conf" "${LNMP_SUPERVISOR_CONFIG}"
 cat > "${LNMP_SUPERVISOR_CONFIG}" <<CONF
@@ -118,6 +119,25 @@ systemctl disable php74-fpm
 grep -q '^\[program:preserved\]' "${work}/existing.conf"
 ! grep -q '^\[program:php74-fpm\]' "${work}/existing.conf"
 [ "$(LNMP_Supervisor_Ctl pid php-fpm)" = "${main_pid}" ]
+# Optional real PostgreSQL coverage: mirror enable -> initdb -> start from
+# Install_PostgreSQL, including an unprivileged database process.
+if [ -n "${LNMP_TEST_PGSQL_DIR:-}" ]; then
+  pgsql_install_dir=${LNMP_TEST_PGSQL_DIR}
+  pgsql_data_dir=${work}/pgdata
+  id postgres >/dev/null 2>&1 || useradd -d "${work}" -s /bin/bash postgres
+  mkdir -p "${pgsql_data_dir}" "${work}/pgsocket"
+  chown postgres:postgres "${pgsql_data_dir}" "${work}/pgsocket"
+  systemctl enable postgresql
+  su - postgres -c "${pgsql_install_dir}/bin/initdb -D ${pgsql_data_dir} -A trust --no-locale"
+  printf "unix_socket_directories = '%s'\nlisten_addresses = ''\n" "${work}/pgsocket" >> "${pgsql_data_dir}/postgresql.conf"
+  systemctl start postgresql
+  su - postgres -c "${pgsql_install_dir}/bin/psql -h ${work}/pgsocket -d postgres -v ON_ERROR_STOP=1 -c 'SELECT 1'"
+  systemctl reload postgresql
+  systemctl stop postgresql
+  systemctl start postgresql
+  systemctl disable postgresql
+  echo 'PASS: PostgreSQL initdb, SQL query, reload, stop/start, unregister.'
+fi
 systemctl restart rsyslog ssh
 chkconfig mysqld on
 update-rc.d mysqld defaults
