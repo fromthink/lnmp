@@ -515,7 +515,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}12${CEND}. Install php-8.2"
           echo -e "\t${CMSG}13${CEND}. Install php-8.3"
           echo -e "\t${CMSG}14${CEND}. Install php-8.4"
-          echo -e "\t${CMSG}15${CEND}. Install php-8.4"
+          echo -e "\t${CMSG}15${CEND}. Install php-8.5"
           read -e -p "Please input a number:(Default 14 press Enter) " php_option
           php_option=${php_option:-14}
           if [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]]; then

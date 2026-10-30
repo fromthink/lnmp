@@ -83,6 +83,7 @@ Install_PHP70() {
 
   tar xzf php-${php70_ver}.tar.gz
   pushd php-${php70_ver}
+  patch -p1 < ../7.0-CVE-2026-109618-109619.patch
   make clean
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   { [ ${RHEL_ver:-0} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver:-0} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver:-0} -ge 19 >/dev/null 2>&1 ]; } || intl_modules_options='--enable-intl'

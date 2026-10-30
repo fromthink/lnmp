@@ -393,8 +393,8 @@ checkDownload() {
       13)
         FILE_NAME=postgresql-${pgsql_ver}.tar.gz
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_PGSQL=https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v${pgsql_ver}
-          DOWN_ADDR_PGSQL_BK=https://mirrors.ustc.edu.cn/postgresql/source/v${pgsql_ver}
+          DOWN_ADDR_PGSQL=https://mirrors.aliyun.com/postgresql/source/v${pgsql_ver}
+          DOWN_ADDR_PGSQL_BK=https://repo.huaweicloud.com/postgresql/source/v${pgsql_ver}
         else
           DOWN_ADDR_PGSQL=https://ftp.postgresql.org/pub/source/v${pgsql_ver}
           DOWN_ADDR_PGSQL_BK=https://ftp.heanet.ie/mirrors/postgresql/source/v${pgsql_ver}

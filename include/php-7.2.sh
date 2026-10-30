@@ -77,6 +77,7 @@ Install_PHP72() {
 
   tar xzf php-${php72_ver}.tar.gz
   pushd php-${php72_ver} > /dev/null
+  patch -p1 < ../7.2-CVE-2026-109618-109619.patch
   if [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
     sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c
     sed -i '/OPENSSL_SSLV23_PADDING/a#endif' ext/openssl/openssl.c
