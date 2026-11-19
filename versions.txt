@@ -94,6 +94,7 @@ pecl_redis_ver=6.3.0
 # Memcached
 memcached_ver=1.6.45
 libmemcached_ver=1.0.18
+libmemcached_sha256=e22c0bb032fde08f53de9ffbc5a128233041d9f33b5de022c0978a2149885f82
 pecl_memcached_ver=3.4.0
 pecl_memcache_ver=8.2
 
