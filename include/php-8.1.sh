@@ -228,7 +228,11 @@ slowlog = var/log/slow.log
 rlimit_files = 51200
 rlimit_core = 0
 
-catch_workers_output = yes
+; Temporary mitigation for CVE-2026-129291; this EOL branch has no fixed release.
+; Reduce session upload-progress exposure on unsupported PHP branches.
+php_admin_flag[session.upload_progress.enabled] = off
+
+catch_workers_output = no
 ;env[HOSTNAME] = $HOSTNAME
 env[PATH] = /usr/local/bin:/usr/bin:/bin
 env[TMP] = /tmp

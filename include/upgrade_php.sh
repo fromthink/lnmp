@@ -42,6 +42,7 @@ Upgrade_PHP() {
       echo "Press Ctrl+c to cancel or Press any key to continue..."
       char=`get_char`
     fi
+    Verify_PHP_Archive "php-${NEW_php_ver}.tar.gz" || exit 1
     tar xzf php-${NEW_php_ver}.tar.gz
     . "${current_dir}/include/php_security_patch.sh"
     (cd "php-${NEW_php_ver}" && Apply_PHP_Security_Patch "${NEW_php_ver}") || exit 1

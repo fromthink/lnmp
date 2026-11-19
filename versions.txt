@@ -48,10 +48,14 @@ php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.30
 php81_ver=8.1.34
-php82_ver=8.2.35
-php83_ver=8.3.36
-php84_ver=8.4.27
-php85_ver=8.5.12
+php82_ver=8.2.36
+php82_sha256=c871dbdc1cd3d898e48632c8b5fcc73f1b0e1cbb15ef816579ced7f2ae1696a8
+php83_ver=8.3.37
+php83_sha256=cdd2ed867cb104ececff7c0292142c807c68a6b6da1b114ead4d586fba628a4f
+php84_ver=8.4.28
+php84_sha256=deffc88c60fcfb99f683a9f6689e9c91cf41b7cba50bd5f01a232a98c27f2cd4
+php85_ver=8.5.13
+php85_sha256=3aeb20a7e667e197929747f76047409196f91f0172357439319cba344df8b3e1
 
 # Nodejs
 nodejs_ver=20.17.0
