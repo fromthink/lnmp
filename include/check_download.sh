@@ -33,7 +33,7 @@ checkDownload() {
   case "${nginx_option}" in
     1)
       echo "Download nginx..."
-      src_url=http://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
+      src_url=https://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
       ;;
     2)
       echo "Download tengine..."
