@@ -1,5 +1,21 @@
 # PHP 安全更新核查（2026-11-19）
 
+## 2026-11-20：接入 BOA 的 7.4/8.1 补丁序列
+
+当前实现以本节为准，后文保留 11 月 19 日的原始排查记录。
+
+- 来源：[BOA 固定提交](https://github.com/omega8cc/boa/tree/204a27bb43e05e0c071e4e8c78cc11eb2586ae9f/aegir/patches/php-sec)；序列和 SHA-256 记录在 include/php_boa_patches.txt。
+- 7.4.33：BOA 的 10 月官方回移、sury-31 历史安全修复、xlts-1 补充修复，依次应用。
+- 8.1.34：BOA 的 10 月官方回移、sury-9 历史安全修复、CVE-2026-129291 FPM 提权修复，依次应用。
+- 安装、mphp 和升级都走 Apply_PHP_Security_Patch；这两个版本改用 BOA 固定序列。8.0 维持原有逻辑。
+- 补丁从固定提交下载，临时文件摘要通过后才进入缓存；缓存也重新校验，异常立即停止。此流程需要能访问 GitHub Raw，不能访问时停止，不降级使用未校验补丁。
+- 先在临时源码副本验证完整序列，再处理编译目录。后续补丁与前序存在重叠，重复执行通过逆序校验整套补丁识别；冲突时不修改原源码。临时目录仅复制补丁涉及的文件，不复制整棵源码。
+- 保留先前禁用上传进度及 8.1 worker 输出捕获的缓解设置。
+- 这些固定补丁并不代表覆盖 11 月所有 CVE；尤其不能把 sury-31/sury-9 当作已包含后续更新。BOA 的配置与应用假设也不能直接套用到 LNMP。
+- 已在原始 7.4.33 / 8.1.34 源码上实际应用完整补丁序列，并验证重复执行。tests/php-boa-patches.sh 使用原始发行包中补丁涉及的文件验证应用与重复识别、篡改缓存拒绝、源码冲突拒绝及失败前后文件一致性；全部通过。脚本语法检查、原 PHP 下载校验测试和 git diff --check 通过。
+- 完整 PHP 编译、PHP 回归套件及 FPM 运行验证尚未完成：本机没有可用的 Linux Docker 服务。
+
+Ubuntu 的 ppa:ondrej/php 属于预编译包维护方案。2026-11-20 实际读取 Ubuntu 24.04 amd64 Packages.gz：PHP 7.4 为 1:7.4.33-37+ubuntu24.04.1+deb.sury.org+1，8.1 为 8.1.34-14+ubuntu24.04.1+deb.sury.org+1。对应 debian/changelog 在 7.4.33-36 / 8.1.34-13 中列出 11 月的 12 项 CVE 回移；比本次 BOA 固定的 sury-31 / sury-9 更新。这是该发行版包的验证结果，不能泛指其他 Ubuntu 发行版或已安装包。添加 PPA 不会更新本项目 /usr/local/php* 下源码安装的 PHP；采用包管理版本需要另行迁移 FPM 服务、socket、配置与扩展。
 ## 官方发布与版本
 
 已核对 [PHP 首页](https://www.php.net/index.php)、[支持周期](https://www.php.net/supported-versions.php)、[ChangeLog](https://www.php.net/ChangeLog-8.php) 与 [源码下载及 SHA-256](https://www.php.net/downloads.php?source=Y)。11 月 19 日安全发布真实存在；不能将最高 CRITICAL 等同于默认 LNMP 可被直接远程利用。
